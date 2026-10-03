@@ -1,0 +1,1 @@
+# local-llm-ocr-translator.Console
