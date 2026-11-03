@@ -1,46 +1,16 @@
-<!--
-  徽章（Badges）说明：
-  将下方 URL 中的 owner/repo 替换为你的 GitHub 用户名与仓库名。
-  更多徽章可在 https://shields.io 生成。
--->
-
 <div align="center">
 
 # local-llm-ocr-translator.Console
 
 > 【截止到26/11/1这个项目还没有完工】用于配合本地部署的llama.cpp模型的极简截图翻译软件。
 
-[![License](https://img.shields.io/github/license/owner/repo?color=blue)](LICENSE)
-[![Release](https://img.shields.io/github/v/release/owner/repo?include_prereleases&sort=semver)](https://github.com/owner/repo/releases)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/owner/repo/ci.yml?branch=main&logo=github)](https://github.com/owner/repo/actions)
-[![Coverage](https://img.shields.io/codecov/c/github/owner/repo?logo=codecov)](https://codecov.io/gh/owner/repo)
-[![Stars](https://img.shields.io/github/stars/owner/repo?style=social)](https://github.com/owner/repo/stargazers)
-[![Forks](https://img.shields.io/github/forks/owner/repo?style=social)](https://github.com/owner/repo/network/members)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
+[![Stars](https://img.shields.io/github/stars/wheatcat123/local-llm-ocr-translator.Console?style=social)](https://github.com/wheatcat123/local-llm-ocr-translator.Console/stargazers)
+[![Forks](https://img.shields.io/github/forks/wheatcat123/local-llm-ocr-translator.Console?style=social)](https://github.com/wheatcat123/local-llm-ocr-translator.Console/network/members)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/wheatcat123/local-llm-ocr-translator.Console/pulls)
 
-[快速开始](#-快速开始) · [文档](https://your-docs-site.com) · [报告问题](https://github.com/owner/repo/issues/new/choose) · [参与贡献](#-贡献指南)
+[项目简介](#项目简介) · [快速开始](#快速开始) · [使用说明](#使用说明) · [配置文件](#配置文件) · [报告问题](https://github.com/wheatcat123/local-llm-ocr-translator.Console/issues)
 
 </div>
-
----
-
-## 📖 目录
-
-- [项目简介](#-项目简介)
-- [特性](#-特性)
-- [技术栈](#-技术栈)
-- [安装](#-安装)
-- [快速开始](#-快速开始)
-- [配置](#️-配置)
-- [使用示例](#-使用示例)
-- [文档](#-文档)
-- [路线图](#️-路线图)
-- [贡献指南](#-贡献指南)
-- [行为准则](#-行为准则)
-- [许可证](#-许可证)
-- [致谢](#-致谢)
-- [联系方式](#-联系方式)
 
 ---
 
@@ -48,208 +18,171 @@
 
 该项目的主程序为Windows控制台应用，属初学者自学实验目的，目前功能完备，但用户体验设计仍在开发阶段
 
+- **功能流程**：按下全局热键，在屏幕上框选一块区域，程序截图后交给Tesseract识别文字，文字发送到本机的 llama-server 翻译，译文显示在选区位置的浮窗中
+- **程序形态**：控制台窗口负责菜单操作，托盘图标负责显示或隐藏控制台，两者与浮窗在同一个进程里运行
 - **适用场景**：在能部署本地LLM的条件下，有以最低的性能开销实现OCR本地截图翻译需求时
 - **不适用场景**：不能本地运行LLM的条件下，不支持.NET运行时的条件下。
 - **当前版本**：`v0.0.1`
+- **作者**：Wheat_Cat（[@wheatcat123](https://github.com/wheatcat123)）
 
 ---
 
 ## 特性
 
-- **高性能**：基于控制台应用的主程序，由WinForms实现
-- 🧩 **可扩展**：插件式架构，易于二次开发
-- 🔒 **安全**：默认遵循最小权限原则
-- 📦 **开箱即用**：一条命令完成安装
-- 🌍 **跨平台**：支持 Linux / macOS / Windows
-- 📝 **完善文档**：中英文双语文档 + 示例代码
+- **控制台菜单**：方向键移动光标，`Enter` 确认，`Esc` 返回上一级，菜单树定义在 `ConsoleCore/MenuBuilder.cs`
+- **全局热键**：默认 `Ctrl+Shift+T`，由一个隐藏的WinForms窗口通过 `RegisterHotKey` 注册
+- **框选截图**：按下热键后全屏出现半透明遮罩，按住左键拖出矩形，松开后按屏幕坐标截图，按 `Esc` 或选区不足 5×5 像素时取消
+- **本地OCR**：使用 Tesseract 5.5.2，识别语言为 `eng+chi_sim`，语言包放在输出目录的 `tessdata` 中
+- **本地翻译**：由程序启动 `llama-server.exe`，轮询 `http://127.0.0.1:8080/health` 直到模型上线，再向 `/v1/chat/completions` 提交翻译请求
+- **译文浮窗**：浮窗覆盖在选区位置上，黑底白字，可以移动、调整大小、最大化，按 `Esc` 关闭
+- **托盘控制**：托盘菜单可以显示控制台、隐藏控制台、退出程序，双击托盘图标显示控制台
+- **配置文件**：`settings.json` 与可执行文件放在同一目录，首次启动时自动创建
+- **离线运行**：OCR与翻译都在本机完成，程序只访问 `127.0.0.1`
 
 ---
 
-## 🛠 技术栈
+## 技术栈
 
-| 类别 | 技术 |
-| --- | --- |
-| 语言 | TypeScript / Python / Go |
-| 框架 | React / FastAPI / Gin |
-| 数据库 | PostgreSQL / Redis |
-| 测试 | Vitest / Pytest |
-| 构建与部署 | Vite / Docker / GitHub Actions |
-
----
-
-## 📦 安装
-
-### 环境要求
-
-- Node.js >= 18（或 Python >= 3.10 / Go >= 1.21）
-- npm >= 9 / pnpm >= 8
-- 其他依赖：……
-
-### 通过包管理器安装
-
-```bash
-# npm
-npm install project-name
-
-# pnpm
-pnpm add project-name
-
-# yarn
-yarn add project-name
-
-# pip
-pip install project-name
-
-# go
-go get github.com/owner/repo
-```
-
-### 从源码构建
-
-```bash
-# 1. 克隆仓库
-git clone https://github.com/owner/repo.git
-cd repo
-
-# 2. 安装依赖
-npm install
-
-# 3. 启动开发环境
-npm run dev
-```
-
-### 使用 Docker
-
-```bash
-docker run -d --name project-name \
-  -p 8080:8080 \
-  -e API_KEY=your_api_key \
-  ghcr.io/owner/repo:latest
-```
+- **语言与运行时**：C#，.NET 10（`net10.0-windows`），启用可空引用与隐式 using
+- **界面**：Windows Forms，高DPI模式为 `PerMonitorV2`
+- **OCR**：`TesseractOCR 5.5.2` NuGet包，随包携带 `tesseract55.dll` 与 `leptonica-1.85.0.dll`
+- **翻译**：llama.cpp 的 `llama-server.exe`，通过HTTP访问 `127.0.0.1:8080`
+- **配置**：`System.Text.Json`
+- **系统调用**：`user32.dll`（热键注册、窗口显示、系统菜单项删除）、`kernel32.dll`（获取控制台窗口句柄）
 
 ---
 
-## 🚀 快速开始
+## 环境要求
 
-30 秒内跑起来的最小示例：
+- Windows 10 或更高版本，程序中包含WinForms界面，未做跨平台处理
+- .NET 10 SDK，或者运行已发布程序时使用对应的桌面运行时
+- llama.cpp 的Windows版本，包含 `llama-server.exe`
+- 一个GGUF格式的模型文件
+- `tessdata` 目录中的 `eng.traineddata` 与 `chi_sim.traineddata`，仓库中已经包含这两个文件
 
-```bash
-# 1. 初始化配置文件
-project-name init
+---
 
-# 2. 运行
-project-name run --config ./config.yml
-```
-
-```ts
-// example.ts
-import { Client } from 'project-name';
-
-const client = new Client({ apiKey: process.env.API_KEY });
-
-const result = await client.doSomething({
-  input: 'hello world',
-});
-
-console.log(result);
-// => { status: 'ok', data: ... }
-```
-
-运行示例：
+## 快速开始
 
 ```bash
-npx tsx example.ts
-# 或
-node dist/example.js
+git clone https://github.com/wheatcat123/local-llm-ocr-translator.Console.git
+cd local-llm-ocr-translator.Console
+dotnet build
+```
+
+启动程序：
+
+```bash
+dotnet run --project wheatcatocrtrans
+```
+
+也可以直接运行 `wheatcatocrtrans\bin\Debug\net10.0-windows\wheatcatocrtrans.exe`。
+
+首次启动时程序在可执行文件所在目录创建 `settings.json`，其中 `LlamaPath` 与 `ModelPath` 默认为空，需要先填写：
+
+1. `LlamaPath` 没有菜单入口，直接编辑 `settings.json`，填入 `llama-server.exe` 的完整路径
+2. 在控制台菜单中进入 `设置 → 模型 → 模型路径`，填入GGUF模型文件的完整路径
+3. 需要卸载层数或其他启动参数时，进入 `设置 → 模型 → 启动参数` 填写，例如 `-ngl 99 -c 4096`
+
+配置完成后在控制台菜单选择 `开启OCR`，程序启动 llama-server 并等待模型上线，最长等待120秒。菜单项变成 `关闭OCR` 之后，按下 `Ctrl+Shift+T` 框选屏幕区域即可得到译文。
+
+---
+
+## 使用说明
+
+控制台窗口：
+
+- `↑` `↓` 移动光标，`Enter` 确认，`Esc` 返回上一级
+- 顶部显示当前的OCR状态，底部显示提示信息与最近一次OCR的文字
+- `设置` 下可以修改原文语言、目标语言、模型路径、启动参数与快捷键，`恢复默认设置` 会用默认配置覆盖当前的 `settings.json`
+- `关于制作者` 显示作者信息，`退出` 结束程序
+- 控制台的关闭按钮已被移除，退出程序需要通过控制台菜单或托盘菜单
+
+托盘图标：
+
+- `显示控制台`、`隐藏控制台`、`退出程序`
+- 双击图标显示控制台
+
+浮窗：
+
+- 译文出现在选区的位置，可以拖动标题栏移动、拖动边缘调整大小
+- 按 `Esc` 关闭浮窗
+
+---
+
+## 配置文件
+
+`settings.json` 与可执行文件放在同一目录，程序使用 `System.Text.Json` 反序列化，缺少字段时使用下表的默认值。
+
+| 字段 | 默认值 | 说明 |
+| --- | --- | --- |
+| `LlamaPath` | 空 | `llama-server.exe` 的完整路径，没有菜单入口 |
+| `ModelPath` | 空 | GGUF模型文件的完整路径 |
+| `StartupParameters` | 空 | 追加在 `-m "<模型路径>"` 之后的启动参数 |
+| `SourceLanguage` | `English` | 原文语言，当前只保存在配置中，识别语言固定为 `eng+chi_sim` |
+| `TargetLanguage` | `Chinese` | 目标语言，写入翻译请求的系统提示词 |
+| `Hotkey` | `Ctrl+Shift+T` | 快捷键，当前热键窗口固定注册 `Ctrl+Shift+T` |
+| `ForegroundColor` | `White` | 译文浮窗前景色，当前浮窗固定使用白色 |
+| `BackgroundColor` | `Black` | 译文浮窗背景色，当前浮窗固定使用黑色 |
+| `FontSize` | `16` | 译文浮窗字号 |
+| `StartupWithWindows` | `false` | 开机自启，尚未实现 |
+
+翻译请求的参数在 `Llama/LlamaManager.cs` 中固定为 `stream = false`、`cache_prompt = false`、`temperature = 0.2`、`max_tokens = 512`，系统提示词要求模型只输出译文，不解释、不加引号。
+
+---
+
+## 项目结构
+
+```text
+Wheat_Cat_OCR_Translator
+├─ wheatcatocrtrans.slnx              解决方案文件
+├─ .vscode/settings.json              指定默认解决方案
+└─ wheatcatocrtrans
+   ├─ Program.cs                      程序入口，启动控制台菜单线程与WinForms消息循环
+   ├─ AppSettings.cs                  配置数据类
+   ├─ SettingsManager.cs              settings.json 的读取、写入与默认配置创建
+   ├─ AppShutdown.cs                  统一退出入口，先停OCR再结束应用
+   ├─ OCRManager.cs                   OCR开关状态、单次翻译流程与浮窗列表
+   ├─ OCRservice.cs                   Tesseract引擎封装
+   ├─ ScreenCaptureService.cs         按屏幕矩形截图
+   ├─ RegionSelectorForm.cs           全屏框选窗口
+   ├─ TranslationOverlayForm.cs       译文浮窗
+   ├─ HotkeyReceiverForm.cs           隐藏窗口，注册与接收全局热键
+   ├─ TrayApplicationContext.cs       托盘图标、托盘菜单与退出逻辑
+   ├─ ConsoleWindowController.cs      控制台窗口的显示、隐藏与关闭按钮移除
+   ├─ ConsoleCore
+   │  ├─ MenuManager.cs               菜单渲染与按键循环
+   │  ├─ MenuBuilder.cs               菜单树的定义
+   │  ├─ MenuNode.cs                  菜单节点的数据结构
+   │  └─ MenuKits.cs                  菜单可以调用的通用操作
+   ├─ Llama
+   │  └─ LlamaManager.cs              启动与关闭 llama-server、健康检查、翻译请求
+   └─ tessdata                        Tesseract语言包
 ```
 
 ---
 
-## ⚙️ 配置
+## 已知限制
 
-配置文件默认位置为 `./config.yml`，也可通过 `--config` 指定。
-
-| 配置项 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `apiKey` | `string` | — | **必填**，API 密钥 |
-| `port` | `number` | `8080` | 服务监听端口 |
-| `logLevel` | `string` | `info` | 日志级别：`debug` / `info` / `warn` / `error` |
-| `timeout` | `number` | `30000` | 请求超时时间（毫秒） |
-| `retry` | `number` | `3` | 失败重试次数 |
-
-示例：
-
-```yaml
-# config.yml
-apiKey: ${API_KEY}
-port: 8080
-logLevel: debug
-timeout: 30000
-retry: 3
-```
-
-> ⚠️ 请勿将包含真实密钥的配置文件提交至版本库，建议使用 `.env` 或密钥管理服务。
-
----
-
-## 💡 使用示例
-
-<details>
-<summary>示例 1：基础用法</summary>
-
-```python
-from project_name import Client
-
-client = Client(api_key="your_api_key")
-resp = client.query("hello")
-print(resp.text)
-```
-
-</details>
-
-<details>
-<summary>示例 2：自定义中间件</summary>
-
-```js
-app.use(async (ctx, next) => {
-  const start = Date.now();
-  await next();
-  ctx.set('X-Response-Time', `${Date.now() - start}ms`);
-});
-```
-
-</details>
-
-<details>
-<summary>示例 3：批量处理</summary>
-
-```bash
-cat inputs.txt | xargs -n 1 project-name process --output ./out
-```
-
-</details>
-
-更多示例请参阅 [`examples/`](./examples) 目录。
-
----
-
-## 📚 文档
-
-- 📘 完整文档：https://your-docs-site.com
-- 🧑‍💻 API 参考：https://your-docs-site.com/api
-- 📝 更新日志：[CHANGELOG.md](CHANGELOG.md)
-- ❓ 常见问题：[FAQ](https://your-docs-site.com/faq)
+- 全局热键固定为 `Ctrl+Shift+T`，配置项 `Hotkey` 还没有接入注册逻辑，热键被其他程序占用时程序会提示注册失败
+- 识别语言固定为 `eng+chi_sim`，配置项 `SourceLanguage` 还没有参与识别
+- 配置项 `ForegroundColor` 与 `BackgroundColor` 还没有生效
+- 配置项 `StartupWithWindows` 还没有实现
+- 菜单节点不能同时拥有子菜单和功能，带子菜单的节点只能用于进入下一级
+- llama-server 的地址与端口固定为 `127.0.0.1:8080`
+- 翻译请求没有设置超时，llama-server 无响应时界面会一直等待
+- 等待模型上线最多120次，每次间隔1秒，超过后判定启动失败并关闭 llama-server
 
 ---
 
 ## 🗺️ 路线图
 
-- [x] v1.0 核心功能
-- [x] v1.1 插件系统
-- [ ] v1.2 多语言支持
-- [ ] v2.0 图形化管理界面
+- [x] v0.0.0 核心功能
+- [x] v0.0.1 可运行的第一个版本
+- [ ] v0.0.2 完整用户界面和配置功能
+- [ ] v0.1.0 TUI用户界面适配
 
-欢迎在 [Issues](https://github.com/owner/repo/issues) 中讨论新特性。
+欢迎在 [Issues](https://github.com/wheatcat123/local-llm-ocr-translator.Console/issues) 中讨论新特性。
 
 ---
 
@@ -263,30 +196,28 @@ cat inputs.txt | xargs -n 1 project-name process --output ./out
 4. 推送分支：`git push origin feat/your-feature`
 5. 提交 **Pull Request**
 
-提交前请确保：
+提交前请确保构建通过：
 
 ```bash
-npm run lint      # 代码风格检查
-npm run test      # 单元测试
-npm run build     # 构建通过
+dotnet build
 ```
-
-详细规范请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ### 开发环境
 
 ```bash
-git clone https://github.com/owner/repo.git
-cd repo
-npm install
-npm run dev
+git clone https://github.com/wheatcat123/local-llm-ocr-translator.Console.git
+cd local-llm-ocr-translator.Console
+dotnet build
+dotnet run --project wheatcatocrtrans
 ```
+
+程序需要本机已经准备好 `llama-server.exe` 与GGUF模型，编译阶段不检查这两个路径。
 
 ---
 
 ## 📜 行为准则
 
-本项目采用 [Contributor Covenant](CODE_OF_CONDUCT.md) 行为准则。参与本项目即表示你同意遵守其条款。
+本项目采用 [Contributor Covenant](https://www.contributor-covenant.org/zh-cn/) 行为准则。参与本项目即表示你同意遵守其条款。
 
 ---
 
@@ -297,7 +228,7 @@ npm run dev
 ```text
 MIT License
 
-Copyright (c) 2024 Your Name
+Copyright (c) 2026 Wheat_Cat
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -317,65 +248,3 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
-
-完整协议见 [LICENSE](LICENSE)。
-
-<!--
-  备选许可证（按需替换上文"许可证"整节内容）：
-
-  * Apache License 2.0 —— 商业友好，附带专利授权与商标条款，需保留 NOTICE 文件。
-    见 https://www.apache.org/licenses/LICENSE-2.0
-
-  * GNU GPL v3.0 —— 强著佐权，衍生作品必须以 GPL 发布。
-    见 https://www.gnu.org/licenses/gpl-3.0.html
-
-  * GNU LGPL v3.0 —— 弱著佐权，允许以动态链接方式用于闭源项目。
-    见 https://www.gnu.org/licenses/lgpl-3.0.html
-
-  * Mozilla Public License 2.0 —— 文件级著佐权，修改过的文件需开源。
-    见 https://www.mozilla.org/en-US/MPL/2.0/
-
-  * BSD 3-Clause —— 类似 MIT，额外禁止使用作者名义背书。
-    见 https://opensource.org/licenses/BSD-3-Clause
-
-  * The Unlicense / CC0 —— 贡献至公共领域，不作任何担保。
-    见 https://unlicense.org/
-
-  如需多许可或双许可，可参考：
-  "This project is dual-licensed under either of Apache License 2.0 or MIT License, at your option."
--->
-
----
-
-## 🙏 致谢
-
-- 感谢所有 [贡献者](https://github.com/owner/repo/graphs/contributors)
-- 本项目受以下开源项目启发：`xxx`、`yyy`
-- 使用了以下优秀开源库：[`zod`](https://github.com/colinhacks/zod)、[`commander`](https://github.com/tj/commander.js)
-
----
-
-## 📮 联系方式
-
-- 作者：Your Name（[@your-handle](https://github.com/your-handle)）
-- 邮箱：you@example.com
-- 交流群：Discord / 微信群 / Slack 链接
-- 问题反馈：[GitHub Issues](https://github.com/owner/repo/issues)
-
----
-
-## ⭐ Star History
-
-<a href="https://star-history.com/#owner/repo&Date">
-  <img src="https://api.star-history.com/svg?repos=owner/repo&type=Date" alt="Star History Chart" width="600" />
-</a>
-
----
-
-<div align="center">
-
-**如果这个项目对你有帮助，请点一个 ⭐ Star 支持一下！**
-
-Made with ❤️ by [Your Name](https://github.com/your-handle)
-
-</div>

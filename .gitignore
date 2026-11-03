@@ -1,0 +1,11 @@
+# 构建输出
+bin/
+obj/
+
+# 本机配置，包含个人路径
+settings.json
+
+# Visual Studio 与 VS Code 的个人文件
+.vs/
+*.user
+*.suo
