@@ -4,8 +4,8 @@
 
 > 【截止到26/11/1这个项目还没有完工】用于配合本地部署的llama.cpp模型的极简截图翻译软件。
 
-[![Stars](https://img.shields.io/github/stars/wheatcat123/local-llm-ocr-translator.Console?style=social)](https://github.com/wheatcat123/local-llm-ocr-translator.Console/stargazers)
-[![Forks](https://img.shields.io/github/forks/wheatcat123/local-llm-ocr-translator.Console?style=social)](https://github.com/wheatcat123/local-llm-ocr-translator.Console/network/members)
+[![Stars](https://img.shields.io/github/stars/wheatcat123/local-llm-ocr-translator.Console?style=social&v=1)](https://github.com/wheatcat123/local-llm-ocr-translator.Console/stargazers)
+[![Forks](https://img.shields.io/github/forks/wheatcat123/local-llm-ocr-translator.Console?style=social&v=1)](https://github.com/wheatcat123/local-llm-ocr-translator.Console/network/members)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/wheatcat123/local-llm-ocr-translator.Console/pulls)
 
 [项目简介](#项目简介) · [快速开始](#快速开始) · [使用说明](#使用说明) · [配置文件](#配置文件) · [报告问题](https://github.com/wheatcat123/local-llm-ocr-translator.Console/issues)
