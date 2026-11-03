@@ -2,10 +2,10 @@
 bin/
 obj/
 
-# 本机配置，包含个人路径
-settings.json
-
 # Visual Studio 与 VS Code 的个人文件
 .vs/
 *.user
 *.suo
+
+# 程序运行时会在可执行文件所在目录生成 settings.json，
+# 该目录位于 bin/ 内，已经被上面的规则忽略。
